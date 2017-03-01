@@ -1,0 +1,38 @@
+<html>
+	<head>
+		<!-- Load CSS -->
+		<link href="../../src/css/toggle_switch.css" rel="stylesheet" type="text/css" />
+		<!-- End Load CSS -->
+		<title>toggle_switch</title>
+	<head>
+	<body>
+		<div class="toggle_switch" name="Highlights"></div>
+		<div class="toggle_switch" name="Global"></div>
+		<div class="toggle_switch" name="Goose"></div>
+		<pre id="selected"></pre>
+		<pre id="output"></pre>
+	</body>
+	<!-- Load Javascript -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="../../src/js/toggle_switch.js"></script>
+	<script type="text/javascript" src="../../third_party/jslib/src/js/StringExt.js"></script>
+	<script type="text/javascript">
+		jQuery( document ).ready( function() {
+			jQuery( '.toggle_switch' ).toggle_switch();
+		});
+		jQuery( window ).on( 'toggle_switch-SWITCH', function( _e, _name, _state ) {
+			jQuery( '#selected' ).text( _name + " = " + _state );
+			switch( _name ) {
+				case 'Highlights':
+					jQuery( '#output' ).text( 'Highlights switch event' );
+					break;
+				case 'Global':
+					jQuery( '#output' ).text( 'Global switch event' );
+					break;
+				case 'Goose':
+					jQuery( '#output' ).text( 'Goose switch event' );
+					break;
+			}
+		});
+	</script>
+<html>

@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<!-- Load CSS -->
+		<link href="../../../src/css/toggle_switch.css" rel="stylesheet" type="text/css" />
+		<!-- End Load CSS -->
+		<title>switch_grid</title>
+	<head>
+	<body>
+		<div class="switch_grid" name="Highlights"></div>
+		<div class="switch_grid" name="Global"></div>
+		<div class="switch_grid" name="Goose"></div>
+		<pre id="output"></pre>
+	</body>
+	<!-- Load Javascript -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="../../../src/js/switch_grid.js"></script>
+	<script type="text/javascript" src="../../../src/js/toggle_switch.js"></script>
+	<script type="text/javascript" src="../../../third_party/jslib/src/js/StringExt.js"></script>
+	<script type="text/javascript">
+		jQuery( document ).ready( function() {
+			jQuery( '.switch_grid' ).switch_grid({
+				callback: {
+					'Highlights': function( _position ) {
+						console.log( 'Highlights is ' + _position );
+					},
+					'Global': function( _position ) {
+						console.log( 'Global is ' + _position );
+					}
+				}
+			});
+		});
+		jQuery( window ).on( 'switch_grid-SWITCH', function( _e, _state, _diff ) {
+//			console.log( _state );
+//			console.log( _diff );
+		});
+	</script>
+<html>

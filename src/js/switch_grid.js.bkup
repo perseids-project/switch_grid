@@ -1,0 +1,226 @@
+/*!
+ * switch_grid - switch_grid
+ * http://adamtavares.com
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+;(function(jQuery) {
+	
+	/**
+	 * Holds default config, adds user defined config, and initializes the plugin
+	 *
+	 * @param { obj } _elem The DOM element where the plugin will be drawn
+	 *
+	 * @param { obj } _config Key value pairs to hold the plugin's configuration
+	 *
+	 * @param { string } _id The id of the DOM element
+	 */
+	function switch_grid( _elem, _config, _id, _total, _n ) {
+		var self = this;
+		self.elem = _elem;
+		self.id = _id;
+		self.total = _total; // total number of instances
+		self.n = _n // the instance number
+		self.init( _elem, _config );
+	}
+	
+	/**
+	 * Holds default config, adds user defined config, and initializes the plugin
+	 *
+	 * @param { obj } _elem The DOM element where the plugin will be drawn
+	 *
+	 * @param { obj } _config Key value pairs to hold the plugin's configuration
+	 */
+	switch_grid.prototype.init = function( _elem, _config ) {
+		var self = this;
+		
+		//------------------------------------------------------------
+		//	User config 
+		//------------------------------------------------------------
+		self.config = jQuery.extend({
+			animation_s: 0.3,
+			off_link: {},
+			on_link: {},
+			toggle_link: {},
+			callback: {}
+		}, _config );
+		
+		//------------------------------------------------------------
+		//  Events
+		//------------------------------------------------------------
+		self.events = {
+			switch: 'switch_grid-SWITCH'
+		}
+		
+		//------------------------------------------------------------
+		//  State History
+		//------------------------------------------------------------
+		self.history = [];
+		
+		//------------------------------------------------------------
+		//  Get the name
+		//------------------------------------------------------------
+		self.name = jQuery( self.elem ).attr( 'name' );
+		
+		//------------------------------------------------------------
+		//  Create a tag id
+		//------------------------------------------------------------
+		self.tagId = self.name.alphaOnly().toLowerCase();
+		
+		//------------------------------------------------------------
+		//  Build the thing
+		//------------------------------------------------------------
+		self.build();
+	}
+	
+	switch_grid.prototype.build = function() {
+		var self = this;
+		jQuery( self.elem ).addClass( '.switch_grid' );
+		jQuery( self.elem ).append('\
+			<label>'+self.name+'</label>\
+			<div class="onoffswitch">\
+				<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="'+self.tagId+'" checked>\
+				<label class="onoffswitch-label" for="'+self.tagId+'">\
+					<div class="onoffswitch-inner"></div>\
+					<div class="onoffswitch-switch"></div>\
+				</label>\
+			</div>\
+		');
+		self.start();
+	}
+	
+	switch_grid.prototype.toggle = function( _name ) {
+		var self = this;
+		if ( self.check( _name ) == true ) {
+			self.off( _name );
+		}
+		else {
+			self.on( _name );
+		}
+	}
+	
+	switch_grid.prototype.start = function() {
+		var self = this;
+		jQuery( '.onoffswitch-label', self.elem ).on( 'touchstart click', function( _e ) {
+			//------------------------------------------------------------
+			//  Wait for animation to run
+			//------------------------------------------------------------
+			self.run();
+		});
+		//------------------------------------------------------------
+		//  Mark initial state
+		//------------------------------------------------------------
+		if ( self.n == self.total ) {
+			self.getState();
+		}
+	}
+	
+	switch_grid.prototype.run = function() {
+		var self = this;
+		//------------------------------------------------------------
+		//  Wait for animation to run
+		//------------------------------------------------------------
+		setTimeout( function() {
+			//------------------------------------------------------------
+			//  Gather all the switch states
+			//------------------------------------------------------------
+			var state = self.getState();
+			var diffs = self.diff();
+			//------------------------------------------------------------
+			//  Announce the switch event.
+			//------------------------------------------------------------
+			jQuery( window ).trigger( self.events['switch'], [state] );
+		}, self.config.animation_s*1000 );
+	}
+	
+	//------------------------------------------------------------
+	//  Gather all the switch states
+	//------------------------------------------------------------
+	switch_grid.prototype.getState = function() {
+		var self = this;
+		var state = [];
+		jQuery( '.switch_grid .onoffswitch-checkbox' ).each( function() {
+			var id = jQuery( this ).attr('id');
+			var on = jQuery( this ).prop('checked');
+			state.push({ id:id, on:on });
+		});
+		self.history.push( state );
+		return state;
+	}
+	
+	switch_grid.prototype.on = function( _name ) {
+		var self = this;
+		self.byName( _name ).prop( 'checked', true );
+		self.run();
+	}
+	
+	switch_grid.prototype.check = function( _name ) {
+		var self = this;
+		return self.byName( _name ).prop( 'checked' );
+	}
+	
+	switch_grid.prototype.off = function( _name ) {
+		var self = this;
+		self.byName( _name ).prop( 'checked', false );
+		self.run();
+	}
+	
+	switch_grid.prototype.byName = function( _name ) {
+		return jQuery( '[name="'+_name+'"] .onoffswitch-checkbox' );
+	}
+	
+	/**
+	 * What changed?
+	 */
+	switch_grid.prototype.diff = function() {
+		var self = this;
+		if ( self.history.length < 2 ) {
+			return;
+		}
+		var now = self.history[ self.history.length-1 ];
+		var before = self.history[ self.history.length-2 ];
+		var diffs = [];
+		for ( var i=0; i<now.length; i++ ) {
+			if ( now[i].on != before[i].on ) {
+				diffs.push( i );
+			}
+		}
+		return diffs;
+	}
+	
+	switch_grid.prototype.devEvents = function() {}
+	
+	//----------------
+	//	Extend JQuery 
+	//----------------
+	jQuery(document).ready( function(jQuery) {
+		jQuery.fn.switch_grid = function( config ) {
+			var id = jQuery(this).selector;
+			var total = this.length;
+			var n = 1;
+			var grids = [];
+			this.each( function() {
+				grids.push( jQuery.data( this, id, new switch_grid( this, config, id, total, n ) ) );
+				n++;
+			});
+			return grids;
+		};
+	})
+})(jQuery);
